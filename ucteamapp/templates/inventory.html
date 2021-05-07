@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        {% load static %}
+        <link rel='stylesheet' href="{% static 'css/style.css' %}">
+    </head>
+<!-- The sidebar -->
+    <body style ="background-image: url('https://th.bing.com/th/id/Re1139e26555d9325b5df67c5efa72912?rik=b9s%2bUh5aST9%2fTw&riu=http%3a%2f%2fgetwallpapers.com%2fwallpaper%2ffull%2f9%2f1%2fe%2f168436.jpg&ehk=8B7XoAxEElKs6vly5bZsGVBS6IOIMPPs2ajLohzvt3s%3d&risl=&pid=ImgRaw');background-repeat: no-repeat;background-attachment: fixed;background-size: cover; padding: 0; margin: 0;">
+        <div class="sidebar">
+            <a href="/home">Home</a>
+            <a class="active" href="/inventory">Inventory</a>
+            <a href="#did">DID Database</a>
+            <a href="#did">CER / 911</a>
+            <a href="#did">Admin</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}">Log Out</a>
+            {% else %}
+                <a href="/accounts/login">Log In</a>
+            {% endif %}
+            <div style="position: absolute;bottom:0%;left:50%;transform: translate(-50%,0%);">
+                {% if user.is_authenticated %}
+                    <img src='{% static "assets/user_profile_picture/"|add:user.username|add:".png" %}' height="100px" width="100px">
+                    <p style="color:white;white-space:nowrap;">{{ user.get_full_name }}</p>
+                {% else %}
+                    <img src="https://i.imgur.com/2nLLtVN.png" height="100px" width="100px">
+                    <p style="color:white; white-space:nowrap;">Not Logged In</p>
+                {% endif %}
+            </div>
+        </div>
+        {% if user.is_authenticated %}
+            <div id="table_div" class="dropshadowimg" style="background-color:#363636;margin-top:50px; height:95%; width:auto;min-width:600px; transform: translate(-50%, -50%);position: absolute; left: 55%;top: 45%;overflow: auto; ">    
+                <input id="search_inv" onkeyup="searchInv()" style="width:200px;" type="text" placeholder="Search...">
+                <button id="sub-jq" type="button" style="float:right;">Submit Changes</button>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js">
+                </script>
+                
+                <script>
+                    function getCookie(name) {
+                        var cookieValue = null;
+                        if (document.cookie && document.cookie != '') {
+                            var cookies = document.cookie.split(';');
+                            for (var i = 0; i < cookies.length; i++) {
+                                var cookie = jQuery.trim(cookies[i]);
+                                // Does this cookie string begin with the name we want?
+                                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                            }
+                        }
+                        return cookieValue;
+                    }
+                </script>
+                
+                <script>
+                    function post_to_url(path, params, method) {
+                        method = method || "post"; // Set method to post by default if not specified.
+
+                        // The rest of this code assumes you are not using a library.
+                        // It can be made less wordy if you use one.
+                        var form = document.createElement("form");
+                        form.setAttribute("method", method);
+                        form.setAttribute("action", path);
+
+                        var hiddenField = document.createElement("input");
+                        hiddenField.setAttribute("type", "hidden");
+                        hiddenField.setAttribute("name", "data_table");
+                        hiddenField.setAttribute("value", params)
+                        form.appendChild(hiddenField);
+                        csrfField = document.createElement("input");
+                        var csrftoken = getCookie('csrftoken')
+                        console.log("token" + csrftoken)
+                        csrfField.setAttribute("type", "hidden");
+                        csrfField.setAttribute("name", "csrfmiddlewaretoken");
+                        csrfField.setAttribute("value", csrftoken)
+                        form.appendChild(csrfField)
+                        document.body.appendChild(form);
+                        form.submit();
+                    }    
+                </script>
+
+                <script>
+                    $(document).ready(function(){
+                        $("#sub-jq").click(function(){
+                            TableData = ""
+                            $('#inv-tab tr').each(function(row, tr){
+                                TableData = TableData + $(tr).find('td:eq(0)').text() + ','+ $(tr).find('td:eq(1)').text() + ','+ $(tr).find('td:eq(2)').text() + ','+ $(tr).find('td:eq(3)').text() + '\n';
+                            }); 
+                            post_to_url('save_table', TableData)
+                        });
+                    });
+                </script>
+                <script src="http://d3js.org/d3.v3.min.js"></script>
+                <script>
+                    $(document).ready(function(){
+                        $("#add_line").click(function(){
+                            var table = document.getElementById("inv-tab");
+                            var row = table.insertRow(1);
+                            var cell1 = row.insertCell(0);
+                            var cell2 = row.insertCell(1);
+                            var cell3 = row.insertCell(2);
+                            var cell4 = row.insertCell(3);
+                        });
+                    });
+                </script>
+                
+                <script type="text/javascript"charset="utf-8">
+                    d3.text('{% static "assets/csv/phones.csv" %}', function(data) {
+                        var parsedCSV = d3.csv.parseRows(data);
+
+                        var container = d3.select("#table_div")
+                            .append("table")
+                                .attr("id","inv-tab")
+
+                            .selectAll("tr")
+                                .data(parsedCSV).enter()
+                                .append("tr")
+
+                            .selectAll("td")
+                                .data(function(d) { return d; }).enter()
+                                .append("td")
+                                    .attr("contenteditable",true)
+                                .text(function(d) { return d; });
+
+
+                    });
+                </script>
+                <script type="text/javascript"charset="utf-8">
+                function searchInv() {
+                    var input, filter, table, tr, td, i;
+                    input = document.getElementById("search_inv");
+                    filter = input.value.toUpperCase();
+                    table = document.getElementById("table_div");
+                    tr = table.getElementsByTagName("tr");
+                    for (var i = 0; i < tr.length; i++) {
+                        var tds = tr[i].getElementsByTagName("td");
+                        var flag = false;
+                        for(var j = 0; j < tds.length; j++){
+                            var td = tds[j];
+                            if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                                flag = true;
+                            }
+                            else if (td.innerHTML.toUpperCase().indexOf("MAC") > -1) {
+                                flag = true;
+                            }
+                        }
+                        if(flag){
+                            tr[i].style.display = "";
+                        }
+                        else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+                }
+                </script>
+            </div>
+            <div style="right: 2%; position: fixed;bottom:2%;">
+                <button id="add_line" type="button" title='Add line'><img src="https://cdn4.iconfinder.com/data/icons/web-mobile-3-3/20/131-512.png" width="30" height="30" /></button>
+            </div>
+        {% else %}
+            <div class="dropshadowimg" style="background-color:#363636; height:120px; width:400px;transform: translate(-50%, -50%);position: absolute; left: 55%;top: 45%; ">   
+                <h1 style="color:red;"><center>ACCESS DENIED</center></h1>
+                <a  href="/accounts/login">
+                    <center>
+                            <button>Go to Log In</button>
+                    </center>
+                </a>
+            </div>
+        {% endif %}
+    </body>     
+</html>
