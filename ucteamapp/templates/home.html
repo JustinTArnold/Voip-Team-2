@@ -12,7 +12,7 @@
 		<div class="sidebar">
 		    <a class="active" href="/home">Home</a>
 		    <a href="/inventory">Inventory</a>
-		    <a href="#did">DID Database</a>
+		    <a href="/did">DID Database</a>
 		    <a href="#did">CER / 911</a>
 		    <a href="#did">Admin</a>
 		    {% if user.is_authenticated %}
@@ -42,7 +42,6 @@
 
 			d3.csv('{% static "assets/csv/phones.csv" %}', data => {
 			    for(const entry of data) {
-			    	console.log(entry.Model);
 			    	if(models[entry.Model]) {
 			    		models[entry.Model]++;
 			    	}
@@ -73,6 +72,45 @@
 			});
 			</script>
 			<h2 style="color:white;"><center> Phone Inventory </center></h2>
+		</div>
+		<div class="dropshadowimg" style="background-color:#363636; height:475px; width:400px;transform: translate(-50%, -50%);position: fixed; left: 50%;top: 30%; ">
+			<canvas id="myChart2" width="400" height="450"></canvas>
+			<script>
+			const didstatus = {
+			  'Available': 1,
+			  'Unavailable': 1
+			}
+
+			d3.csv('{% static "assets/csv/numbers.csv" %}', data => {
+			    for(const entry of data) {
+			    	if(didstatus[entry.Status]) {
+			    		didstatus[entry.Status]++;
+			    	}
+			    }
+			var ctx = document.getElementById('myChart2');
+			var myChart2 = new Chart(ctx, {
+			    type: 'doughnut',
+			    data: {
+			        labels: ['Available', 'Not Available'],
+			        datasets: [{
+			            label: 'Did Info',
+			            data:  [didstatus.Available-1 , didstatus.Unavailable-1],
+			            backgroundColor: [
+			                'rgba(40, 99, 60, 0.2)',
+			                'rgba(120, 0, 0, 0.2)',
+			            ],
+			            borderColor: [
+			                'rgba(40, 99, 60, 1)',
+			                'rgba(120, 0, 0, 1)',
+			            ],
+			            borderWidth: 2,
+			            hoverOffset: 2
+			        }]
+			    },
+			});
+			});
+			</script>
+			<h2 style="color:white;"><center> D.I.D Info </center></h2>
 		</div>
 		{% else %}
             <div class="dropshadowimg" style="background-color:#363636; height:120px; width:400px;transform: translate(-50%, -50%);position: absolute; left: 55%;top: 45%; ">   

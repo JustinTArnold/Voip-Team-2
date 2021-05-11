@@ -27,3 +27,20 @@ def save_table(request):
         file.write(info)
 
     return redirect('inventory')
+def inventory(request):
+    template = loader.get_template('did.html')
+    return HttpResponse(template.render())
+def did_save(request):
+    info = list(request.POST.items())[0]
+    info = list(info)
+    info = info.pop()
+    info = info.replace("\r\n","\n")
+    file_path = './ucteamapp/static/assets/csv/numbers.csv'
+    try:
+        os.remove(file_path)
+    except:
+        pass
+    with open(file_path, 'a+') as file:
+        file.write(info)
+
+    return redirect('did')

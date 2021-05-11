@@ -8,8 +8,8 @@
     <body style ="background-image: url('https://th.bing.com/th/id/Re1139e26555d9325b5df67c5efa72912?rik=b9s%2bUh5aST9%2fTw&riu=http%3a%2f%2fgetwallpapers.com%2fwallpaper%2ffull%2f9%2f1%2fe%2f168436.jpg&ehk=8B7XoAxEElKs6vly5bZsGVBS6IOIMPPs2ajLohzvt3s%3d&risl=&pid=ImgRaw');background-repeat: no-repeat;background-attachment: fixed;background-size: cover; padding: 0; margin: 0;">
         <div class="sidebar">
             <a href="/home">Home</a>
-            <a class="active" href="/inventory">Inventory</a>
-            <a href="/did">DID Database</a>
+            <a href="/inventory">Inventory</a>
+            <a class="active" href="/did" >DID Database</a>
             <a href="#did">CER / 911</a>
             <a href="#did">Admin</a>
             {% if user.is_authenticated %}
@@ -86,7 +86,7 @@
                             $('#inv-tab tr').each(function(row, tr){
                                 TableData = TableData + $(tr).find('td:eq(0)').text() + ','+ $(tr).find('td:eq(1)').text() + ','+ $(tr).find('td:eq(2)').text() + ','+ $(tr).find('td:eq(3)').text() + '\n';
                             }); 
-                            post_to_url('save_table', TableData)
+                            post_to_url('did_save', TableData)
                         });
                     });
                 </script>
@@ -105,7 +105,7 @@
                 </script>
                 
                 <script type="text/javascript"charset="utf-8">
-                    d3.text('{% static "assets/csv/phones.csv" %}', function(data) {
+                    d3.text('{% static "assets/csv/numbers.csv" %}', function(data) {
                         var parsedCSV = d3.csv.parseRows(data);
 
                         var container = d3.select("#table_div")

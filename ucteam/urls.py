@@ -11,5 +11,7 @@ urlpatterns = [
     path('inventory/save_table', views.save_table, name='save_table'),  
     path('home/', TemplateView.as_view(template_name='home.html'), name='home'),
     path('inventory/', TemplateView.as_view(template_name='inventory.html'), name='inventory'),
-    path('accounts/', include('django.contrib.auth.urls'))
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('did/did_save', views.did_save, name='did_save'),  
+    path('did/', TemplateView.as_view(template_name='did.html'), name='did')
 ]  
