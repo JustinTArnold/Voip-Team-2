@@ -6,13 +6,115 @@
 		<script src="http://d3js.org/d3.v3.min.js"></script>
 		<!-- script for the pie chart -->
 		<script type="text/javascript" src="{% static 'js/chartjs/package/dist/chart.js' %}"></script>
-		<style>
-		body {
-		  margin: 0;
-		  min-width: 250px;
-		}
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+		<script type="text/javascript"charset="utf-8">
+            d3.csv('{% static "assets/csv/todo.csv" %}', function(data) {
+	            var container = d3.select("#todolist")
+	                .selectAll("li")
+	                .data(data).enter()
+	                .append("li")
+	                	.attr("style","width:100%")
+	                	.attr("id","todoli")
+	                	.attr("onclick","funcDelete()")
+	                	.attr("class",function(d) { return d.status; })
+	                .text(function(d) { return d.task; })
+	                .append("SPAN")
+	                	.attr("class","close")
+	                	.attr("onclick","funcDelete2()")
+	               	.text("\u00D7");
+            });
+        </script>
+        <script type="text/javascript">
+        	function funcDelete() {
+        		if (event.target.classList.contains('checked')) {
+        			event.target.classList.remove('checked');
+        			event.target.classList.add('notchecked');
+        		} else {
+        			event.target.classList.add('checked');
+        			event.target.classList.remove('notchecked');
+        		}
+        	}
+        </script>
+       	<script type="text/javascript">
+        	function funcDelete2() {
+        		event.target.parentNode.remove();
+        	}
+        </script>
+        <script type="text/javascript">
+        	function addtotodo() {
+        		var title = d3.select("#todotitle").node().value;
+        		if (title.length == 0) {
+        			alert("Cant leave title blank!")
+        		} else {
+        			var container = d3.select("#todolist")
+		                .append("li")
+		                	.attr("style","width:100%")
+		                	.attr("id","todoli")
+		                	.attr("onclick","funcDelete()")
+		                	.attr("class","notchecked")
+		                .text(title)
+		                .append("SPAN")
+		                	.attr("class","close")
+		                	.attr("onclick","funcDelete2()")
+		               	.text("\u00D7");
+        		}
+        	}
+        </script>
+       	 <script>
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        </script>
+       	<script>
+            function post_to_url(path, params, method) {
+                method = method || "post"; // Set method to post by default if not specified.
 
-		/* Include the padding and border in an element's total width and height */
+                // The rest of this code assumes you are not using a library.
+                // It can be made less wordy if you use one.
+                var form = document.createElement("form");
+                form.setAttribute("method", method);
+                form.setAttribute("action", path);
+
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", "infoToSend");
+                hiddenField.setAttribute("value", params)
+                form.appendChild(hiddenField);
+                csrfField = document.createElement("input");
+                var csrftoken = getCookie('csrftoken')
+                console.log("token" + csrftoken)
+                csrfField.setAttribute("type", "hidden");
+                csrfField.setAttribute("name", "csrfmiddlewaretoken");
+                csrfField.setAttribute("value", csrftoken)
+                form.appendChild(csrfField)
+                document.body.appendChild(form);
+                form.submit();
+            }    
+        </script>
+       	<script>
+       		function serveraddtodo() {
+                var listInfo = document.getElementById('todolist').getElementsByTagName('li');
+          		infoToSend = "";
+                for (i=0; i < listInfo.length; i++) {
+                   infoToSend = infoToSend + listInfo[i].innerText.substring(0, listInfo[i].innerText.length - 1)+listInfo[i].className;
+                }
+                post_to_url('save_todo', infoToSend)
+            }
+       	</script>
+	</head>
+	<style>
 		* {
 		  box-sizing: border-box;
 		}
@@ -21,6 +123,7 @@
 		ul {
 		  margin: 0;
 		  padding: 0;
+		  list-style-type: none;
 		}
 
 		/* Style the list items */
@@ -28,11 +131,10 @@
 		  cursor: pointer;
 		  position: relative;
 		  padding: 12px 8px 12px 40px;
-		  list-style-type: none;
 		  background: #eee;
 		  font-size: 18px;
 		  transition: 0.2s;
-		  
+
 		  /* make the list items unselectable */
 		  -webkit-user-select: none;
 		  -moz-user-select: none;
@@ -86,7 +188,7 @@
 
 		/* Style the header */
 		.header {
-		  background-color: rgba(50,50,120,1);
+		  background-color: #f44336;
 		  padding: 30px 40px;
 		  color: white;
 		  text-align: center;
@@ -103,90 +205,33 @@
 		input {
 		  margin: 0;
 		  border: none;
-		  border-radius: 0;
 		  width: 75%;
 		  padding: 10px;
 		  float: left;
 		  font-size: 16px;
+		  border-radius: 7px;
+		  border-color:black;
 		}
 
 		/* Style the "Add" button */
 		.addBtn {
 		  padding: 10px;
 		  width: 25%;
-		  background: #d9d9d9;
-		  color: #555;
+		  background: #363636;
+		  color: #fff;
 		  float: left;
 		  text-align: center;
 		  font-size: 16px;
 		  cursor: pointer;
 		  transition: 0.3s;
-		  border-radius: 0;
+		  border-radius: 7px;
+		  border-color:black;
 		}
 
 		.addBtn:hover {
 		  background-color: #bbb;
 		}
-		</style>
-		<script>
-		// Create a "close" button and append it to each list item
-		var myNodelist = document.getElementsByTagName("LI");
-		var i;
-		for (i = 0; i < myNodelist.length; i++) {
-		  var span = document.createElement("SPAN");
-		  var txt = document.createTextNode("\u00D7");
-		  span.className = "close";
-		  span.appendChild(txt);
-		  myNodelist[i].appendChild(span);
-		}
-
-		// Click on a close button to hide the current list item
-		var close = document.getElementsByClassName("close");
-		var i;
-		for (i = 0; i < close.length; i++) {
-		  close[i].onclick = function() {
-		    var div = this.parentElement;
-		    div.style.display = "none";
-		  }
-		}
-
-		// Add a "checked" symbol when clicking on a list item
-		var list = document.querySelector('ul');
-		list.addEventListener('click', function(ev) {
-		  if (ev.target.tagName === 'LI') {
-		    ev.target.classList.toggle('checked');
-		  }
-		}, false);
-
-		// Create a new list item when clicking on the "Add" button
-		function newElement() {
-		  var li = document.createElement("li");
-		  var inputValue = document.getElementById("myInput").value;
-		  var t = document.createTextNode(inputValue);
-		  li.appendChild(t);
-		  if (inputValue === '') {
-		    alert("You must write something!");
-		  } else {
-		    document.getElementById("myUL").appendChild(li);
-		  }
-		  document.getElementById("myInput").value = "";
-
-		  var span = document.createElement("SPAN");
-		  var txt = document.createTextNode("\u00D7");
-		  span.className = "close";
-		  span.appendChild(txt);
-		  li.appendChild(span);
-
-		  for (i = 0; i < close.length; i++) {
-		    close[i].onclick = function() {
-		      var div = this.parentElement;
-		      div.style.display = "none";
-		    }
-		  }
-		}
-		</script>
-
-	</head>
+	</style>
     <!-- the sidebar -->
 	<body style ="background-image: url('https://th.bing.com/th/id/Re1139e26555d9325b5df67c5efa72912?rik=b9s%2bUh5aST9%2fTw&riu=http%3a%2f%2fgetwallpapers.com%2fwallpaper%2ffull%2f9%2f1%2fe%2f168436.jpg&ehk=8B7XoAxEElKs6vly5bZsGVBS6IOIMPPs2ajLohzvt3s%3d&risl=&pid=ImgRaw');background-repeat: no-repeat;background-attachment: fixed;background-size: cover; padding: 0; margin: 0;">
 		<div class="sidebar">
@@ -215,16 +260,20 @@
 			<div style="position: fixed;height:475px;width:50%;float:left;">
 				<center><h1 style="color:white;">Next Cutover</h1></center>
 				<hr>
-			</div>
-			<div style="border-left:2px solid #aaa;height:475px;width:50%;float:right;background-color: rgba(50,50,120,1);">
-				<div id="myDIV" class="header">
-				  <h2>Cutover To Do List</h2>
-				  <input type="text" id="myInput" placeholder="Title...">
-				  <span onclick="newElement()" class="addBtn">Add</span>
+				<div style="position:relative;height:200px;width:200px;background-color:teal;margin:0 auto;border-radius:15px">
+				<h2 style="color:white;position:relative;top:40%;left:24%">Date TBD</h2>
 				</div>
-
-				<ul id="myUL">
+				<h1 style="color:white;position:relative;top:5%;left:26%">Building F</h1>
+			</div>
+			<div style="border-left:2px solid #aaa;height:475px;width:50%;float:right;background-color:teal;">
+				<center>
+					<h2 style="color:white;">Cutover To Do List</h2>
+					<input id="todotitle" type="search" placeholder="Title Here.."><button onclick="addtotodo()" class="addBtn">Add</button>
+				</center>
+				<br><br><br>
+				<ul id="todolist" style="height:65%;overflow:auto;">
 				</ul>
+				<button onclick="serveraddtodo()" class="addBtn"style="position:absolute;bottom:0%;left:63%;border-radius:7px;border-color:black;cursor:pointer;transition: 0.2s;">Save Changes</button>
 			</div>
 		</div>
 		<div class="dropshadowimg" style="background-color:#363636; height:475px; width:400px;transform: translate(-50%, -50%);position: fixed; left: 25%;top: 30%; ">
