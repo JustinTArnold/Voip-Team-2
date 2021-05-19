@@ -12,6 +12,9 @@ def baseredirect(request):
 def home(request):
     template = loader.get_template('home.html')
     return HttpResponse(template.render())
+def cer911(request):
+    template = loader.get_template('cer911.html')
+    return HttpResponse(template.render())
 
 def inventory(request):
     template = loader.get_template('inventory.html')
