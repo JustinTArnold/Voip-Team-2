@@ -7,7 +7,8 @@ import csv
   
 def hello(request):  
     return HttpResponse("<h2>Hello, Welcome to Django!</h2>")
-
+def baseredirect(request):
+    return redirect('home')
 def home(request):
     template = loader.get_template('home.html')
     return HttpResponse(template.render())
